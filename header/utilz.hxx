@@ -25,24 +25,20 @@ void flatten(int x, int parent[]) {
     int j = x;
     while (parent[j] != 0) {
         j = parent[j];
+        std::cout<<"flatten\n";
     }
     parent[x] = j;
 }
 
 void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image){
-    output_image.assign(input_binary_image.width(), input_binary_image.height(),1,1);
-    output_image.fill(0);
+    output_image.assign(input_binary_image.width(), input_binary_image.height(),1,3);
+    output_image.fill(255);
 
     int pixel_labels[input_binary_image.width()][input_binary_image.height()] = {0};
 
     int parent[2000]; 
 
     int current_label = 1; //current label counter. starts at 1, increments when a new label is needed
-
-
-
-
-
 
     // 2 passes over the input image pixels
 
@@ -98,32 +94,32 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
                 if (c_ == 0) {
                     if (a == 0) {
                         // copy c_, a
-                        union_(c_, a, parent);
+                        union_(pixel_labels[c-1][r-1], pixel_labels[c+1][r-1], parent);
                         // e = c_;
                         e = pixel_labels[c+1][r-1];
                         //TODO
                     } else if (a == 255) {
                         if (d == 0) {
                             // copy c, d
-                            union_(c_, d, parent);
+                            union_(pixel_labels[c+1][r-1], pixel_labels[c-1][r], parent);
                             //TODO
-                            e = c_;
-                            e = pixel_labels[c+1][r-1];
+                            // e = c_;
+                            e = pixel_labels[c-1][r];
                         } else if (d == 255) {
                             // copy c
-                            e = c_;
+                            // e = c_;
                             e = pixel_labels[c+1][r-1];
                         }
                     }
                 } else if (c_ == 255) {
                     if (a == 0) {
                         // copy a
-                        e = a;
+                        // e = a;
                         e = pixel_labels[c-1][r-1];
                     } else if (a == 255) {
                         if (d == 0) {
                             // copy d
-                            e = d;
+                            // e = d;
                             e = pixel_labels[c-1][r];
                         } else if (d == 255) {
                             // new label
@@ -136,17 +132,13 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
 
             pixel_labels[c][r] = e;
-            std::cout<<"Pixel label e:"<<e<<std::endl;
 
         }
     }
 
     // second pass
-    
-    std::cout<<"BBB"<<std::endl;
-
     //first flatten the parent tree
-    for (int i=1; i<current_label; i++) {
+    for (int i=1; i<current_label+1; i++) {
         if (parent[i] != 0) //don't flatten tree roots
           flatten(i, parent);
     }
@@ -154,12 +146,15 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (pixel_labels[c][r] == -1) {
-                continue; //-1 is the default, so this pixel isn't in a component
+            if (pixel_labels[c][r] == 0) {
+                continue; //0 is the default, so this pixel isn't in a component
             }
 
             int tree_root_label = find(pixel_labels[c][r], parent);
-            pixel_labels[c][r] = tree_root_label;
+            if (pixel_labels[c][r] != tree_root_label) {
+                // std::cout<<"Changing "<<pixel_labels[c][r]<<" to "<<tree_root_label<<std::endl; 
+                pixel_labels[c][r] = tree_root_label;
+            }
         }
     }
 
@@ -171,17 +166,26 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (pixel_labels[c][r] == -1) {
-                continue; //-1 is the default, so this pixel isn't in a component
+            if (pixel_labels[c][r] == 0) {
+                continue; //0 is the default, so this pixel isn't in a component
             }
 
             int component_index = pixel_labels[c][r];
-            input_binary_image(c,r,0) = colors_r[component_index];
-            input_binary_image(c,r,1) = colors_g[component_index];;
-            input_binary_image(c,r,2) = colors_b[component_index];;
+            output_image(c,r,0) = colors_r[component_index];
+            output_image(c,r,1) = colors_g[component_index];;
+            output_image(c,r,2) = colors_b[component_index];;
         }
     }
-
+    std::cout<<"BBB"<<std::endl;
+    // Print the parent array
+    for (int i=1; i<current_label; i++) {
+        std::cout<<i<<" ";
+    }
+    std::cout<<std::endl;
+    for (int i=1; i<current_label; i++) {
+        std::cout<<parent[i]<<" ";
+    }
+    std::cout<<std::endl;
 }
 
 // Part A

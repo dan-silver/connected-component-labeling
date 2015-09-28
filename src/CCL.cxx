@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
         
         exec_ccl(input_image, output_image);
-        input_image.display("Labeled Components");
+        output_image.display("Labeled Components");
         // grayscale_image.save("gray.jpg");
 
     }
