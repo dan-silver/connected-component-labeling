@@ -1,1 +1,1 @@
-/home/dan/Desktop/4650/CCL/bin/src/CMakeFiles/rgb2gray.dir
+/home/dan/Desktop/4650/CCL/bin/src/CMakeFiles/CCL.dir

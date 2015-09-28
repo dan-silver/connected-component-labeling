@@ -243,6 +243,6 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CIMG_CFLAGS}")
 INCLUDE_DIRECTORIES( ${CIMG_H_PATH} )
 
-add_executable (rgb2gray rgb2gray.cxx ${PROJECT_SOURCE_DIR}/header/utilz.hxx)
+add_executable (CCL CCL.cxx ${PROJECT_SOURCE_DIR}/header/utilz.hxx)
 
-target_link_libraries(rgb2gray ${SYSTEM_LIBS} )
+target_link_libraries(CCL ${SYSTEM_LIBS} )

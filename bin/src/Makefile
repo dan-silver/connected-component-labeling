@@ -102,42 +102,42 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-src/CMakeFiles/rgb2gray.dir/rule:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/rgb2gray.dir/rule
-.PHONY : src/CMakeFiles/rgb2gray.dir/rule
+src/CMakeFiles/CCL.dir/rule:
+	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/CCL.dir/rule
+.PHONY : src/CMakeFiles/CCL.dir/rule
 
 # Convenience name for target.
-rgb2gray: src/CMakeFiles/rgb2gray.dir/rule
-.PHONY : rgb2gray
+CCL: src/CMakeFiles/CCL.dir/rule
+.PHONY : CCL
 
 # fast build rule for target.
-rgb2gray/fast:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/build
-.PHONY : rgb2gray/fast
+CCL/fast:
+	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/build
+.PHONY : CCL/fast
 
-rgb2gray.o: rgb2gray.cxx.o
-.PHONY : rgb2gray.o
+CCL.o: CCL.cxx.o
+.PHONY : CCL.o
 
 # target to build an object file
-rgb2gray.cxx.o:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/rgb2gray.cxx.o
-.PHONY : rgb2gray.cxx.o
+CCL.cxx.o:
+	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.o
+.PHONY : CCL.cxx.o
 
-rgb2gray.i: rgb2gray.cxx.i
-.PHONY : rgb2gray.i
+CCL.i: CCL.cxx.i
+.PHONY : CCL.i
 
 # target to preprocess a source file
-rgb2gray.cxx.i:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/rgb2gray.cxx.i
-.PHONY : rgb2gray.cxx.i
+CCL.cxx.i:
+	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.i
+.PHONY : CCL.cxx.i
 
-rgb2gray.s: rgb2gray.cxx.s
-.PHONY : rgb2gray.s
+CCL.s: CCL.cxx.s
+.PHONY : CCL.s
 
 # target to generate assembly for a file
-rgb2gray.cxx.s:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/rgb2gray.cxx.s
-.PHONY : rgb2gray.cxx.s
+CCL.cxx.s:
+	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.s
+.PHONY : CCL.cxx.s
 
 # Help Target
 help:
@@ -147,10 +147,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... rgb2gray"
-	@echo "... rgb2gray.o"
-	@echo "... rgb2gray.i"
-	@echo "... rgb2gray.s"
+	@echo "... CCL"
+	@echo "... CCL.o"
+	@echo "... CCL.i"
+	@echo "... CCL.s"
 .PHONY : help
 
 

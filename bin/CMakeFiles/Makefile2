@@ -56,11 +56,11 @@ CMAKE_BINARY_DIR = /home/dan/Desktop/4650/CCL/bin
 # Directory level rules for directory src
 
 # Convenience name for "all" pass in the directory.
-src/all: src/CMakeFiles/rgb2gray.dir/all
+src/all: src/CMakeFiles/CCL.dir/all
 .PHONY : src/all
 
 # Convenience name for "clean" pass in the directory.
-src/clean: src/CMakeFiles/rgb2gray.dir/clean
+src/clean: src/CMakeFiles/CCL.dir/clean
 .PHONY : src/clean
 
 # Convenience name for "preinstall" pass in the directory.
@@ -68,38 +68,38 @@ src/preinstall:
 .PHONY : src/preinstall
 
 #=============================================================================
-# Target rules for target src/CMakeFiles/rgb2gray.dir
+# Target rules for target src/CMakeFiles/CCL.dir
 
 # All Build rule for target.
-src/CMakeFiles/rgb2gray.dir/all:
-	$(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/depend
-	$(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/build
+src/CMakeFiles/CCL.dir/all:
+	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/depend
+	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/build
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/dan/Desktop/4650/CCL/bin/CMakeFiles  1
-	@echo "Built target rgb2gray"
-.PHONY : src/CMakeFiles/rgb2gray.dir/all
+	@echo "Built target CCL"
+.PHONY : src/CMakeFiles/CCL.dir/all
 
 # Include target in all.
-all: src/CMakeFiles/rgb2gray.dir/all
+all: src/CMakeFiles/CCL.dir/all
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-src/CMakeFiles/rgb2gray.dir/rule: cmake_check_build_system
+src/CMakeFiles/CCL.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles 1
-	$(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/rgb2gray.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/CCL.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles 0
-.PHONY : src/CMakeFiles/rgb2gray.dir/rule
+.PHONY : src/CMakeFiles/CCL.dir/rule
 
 # Convenience name for target.
-rgb2gray: src/CMakeFiles/rgb2gray.dir/rule
-.PHONY : rgb2gray
+CCL: src/CMakeFiles/CCL.dir/rule
+.PHONY : CCL
 
 # clean rule for target.
-src/CMakeFiles/rgb2gray.dir/clean:
-	$(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/clean
-.PHONY : src/CMakeFiles/rgb2gray.dir/clean
+src/CMakeFiles/CCL.dir/clean:
+	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/clean
+.PHONY : src/CMakeFiles/CCL.dir/clean
 
 # clean rule for target.
-clean: src/CMakeFiles/rgb2gray.dir/clean
+clean: src/CMakeFiles/CCL.dir/clean
 .PHONY : clean
 
 #=============================================================================

@@ -102,17 +102,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named rgb2gray
+# Target rules for targets named CCL
 
 # Build rule for target.
-rgb2gray: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rgb2gray
-.PHONY : rgb2gray
+CCL: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CCL
+.PHONY : CCL
 
 # fast build rule for target.
-rgb2gray/fast:
-	$(MAKE) -f src/CMakeFiles/rgb2gray.dir/build.make src/CMakeFiles/rgb2gray.dir/build
-.PHONY : rgb2gray/fast
+CCL/fast:
+	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/build
+.PHONY : CCL/fast
 
 # Help Target
 help:
@@ -122,7 +122,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... rgb2gray"
+	@echo "... CCL"
 .PHONY : help
 
 
