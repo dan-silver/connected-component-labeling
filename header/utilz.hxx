@@ -2,15 +2,71 @@
 #define _utilz__
 #include "CImg.h"
 #include <list>
+#include <set>
 #include <stdlib.h>     /* srand, rand */
 
 // helper class for part B only
-class region {
-    int label;
-    int area; //zeroth moment
-    int centroid_x;
-    int centroid_y;
-};
+class Component {
+    public:
+        Component() {
+            area = centroid_x = centroid_y = variance_x = variance_y = 0;
+        }
+        int label;
+        int area; //zeroth moment
+        int centroid_x;
+        int centroid_y;
+        int variance_y;
+        int variance_x;
+
+        void printInfo(int newIndex) {
+            // std::cout<<"Region "<<this->label<<"("<<newIndex<<"):"<<std::endl;
+            std::cout<<"Region "<<newIndex+1<<":"<<std::endl;
+            std::cout<<"\t Area: "<<this->area<<std::endl;
+            std::cout<<"\t Centroid: ("<<centroid_x<<", "<<centroid_y<<")"<<std::endl;
+            std::cout<<"\t variance x: "<<variance_x<<std::endl;
+            std::cout<<"\t variance y: "<<variance_y<<std::endl;
+        }
+
+        void setLabel(int label) {
+            this->label = label;
+        }
+
+        void incrementArea() {
+            this->area++;
+        }
+} component;
+
+/**
+ *  Populate the allocated component[] array with the unique components
+ */
+void populateComponentArray(Component components[], int parent[], int current_label) {
+    //get the unique component labels
+    std::set<int> unique_labels;
+
+    for (int i=0; i<=current_label; i++) {
+        unique_labels.insert(parent[i]); //labels that are inserted twice are ignored
+    }
+
+    // iterate through the set, add components to the array
+    int component_counter = 0;
+    while (!unique_labels.empty()) {
+      int label = *(unique_labels.begin());
+      unique_labels.erase(label);
+      Component component;
+      component.setLabel(label);
+      components[component_counter] = component;
+      component_counter++;
+    }
+}
+
+//maps the old indices to the new component index in components[]
+void createComponentIndexMap(int componentIndexMap[], Component components[], int number_of_components) {
+    for (int i=0;i<number_of_components;i++) {
+        Component c = components[i];
+        componentIndexMap[c.label] = i;
+        // std::cout<<"old="<<c.label<<" new = "<<componentIndexMap[c.label]<<std::endl;
+    }
+}
 
 int getNumberOfComponents(int parent[], int number_of_labels) {
     // simply count the number of -1s
@@ -165,7 +221,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         colors_b[i] = rand() % 255;
     }
 
-    // loop through parent array, replace 0's with their index
+    // loop through parent array, replace -1's with their index
     for (int i=0; i<current_label; i++) {
         if (parent[i] == -1)
             parent[i] = i;
@@ -184,7 +240,85 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         }
     }
 
-    std::cout<<"Number of Components = "<<number_of_components<<std::endl;
+
+
+    Component components[number_of_components];
+    int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
+
+    populateComponentArray(components, parent, current_label);
+    createComponentIndexMap(componentIndexMap, components, number_of_components);
+
+    // 0th moment
+    // loop over pixels and add them to the area of the components
+
+    Component *component;
+    for (int r = 0; r < input_binary_image.height(); r++) {
+        for (int c= 0; c < input_binary_image.width(); c++) {
+            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+                continue; //background pixel
+            }
+            // find the component (very fast) and increment the area
+            int label = pixel_labels[c][r];
+
+            component = &components[componentIndexMap[label]];
+            component->incrementArea();
+            // std::cout<<componentIndexMap[label]<<":"<<component->area<<std::endl;
+        }
+    }
+
+    // 1st moment
+    for (int r = 0; r < input_binary_image.height(); r++) {
+        for (int c= 0; c < input_binary_image.width(); c++) {
+            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+                continue; //background pixel
+            }
+            // find the component (very fast) and add to the 
+            int label = pixel_labels[c][r];
+            component = &components[componentIndexMap[label]];
+
+            component->centroid_x += c;
+            component->centroid_y += r;
+        }
+    }
+
+    // Loop over the components, and divide the sum of the coordinates by the area to finish the first moment calculation
+    for (int i=0; i<number_of_components; i++) {
+        if (components[i].area == 0) continue;
+        components[i].centroid_x /= components[i].area;
+        components[i].centroid_y /= components[i].area;
+    }
+
+    // 2nd moment
+
+    for (int r = 0; r < input_binary_image.height(); r++) {
+        for (int c= 0; c < input_binary_image.width(); c++) {
+            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+                continue; //background pixel
+            }
+            // find the component (very fast) and add to the 
+            int label = pixel_labels[c][r];
+            component = &components[componentIndexMap[label]];
+
+            component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
+            component->variance_y += (c - component->centroid_y) * (c - component->centroid_y);
+
+        }
+    }
+    // finish the variance equation by dividing by the area
+    for (int i=0; i<number_of_components; i++) {
+        if (components[i].area == 0) continue;
+        components[i].variance_x /= components[i].area;
+        components[i].variance_y /= components[i].area;
+    }
+
+
+    std::cout<<"Number of Components: "<<number_of_components<<std::endl;
+    std::cout<<"Maximum number of intermediate labels: "<<current_label<<std::endl;
+
+    for (int i=0; i<number_of_components; i++) {
+        components[i].printInfo(i);
+    }
+
 }
 
 void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image) {
