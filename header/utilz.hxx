@@ -1,10 +1,32 @@
 #ifndef _utilz__
 #define _utilz__
 #include "CImg.h"
+#include <list>
+#include <stdlib.h>     /* srand, rand */
+
+// helper class for part B only
+class region {
+    int label;
+    int area; //zeroth moment
+    int centroid_x;
+    int centroid_y;
+};
+
+int getNumberOfComponents(int parent[], int number_of_labels) {
+    // simply count the number of -1s
+    // a -1 means that it's a unique tree in the forest
+
+    int number_of_components = 0;
+    for (int i=0; i<number_of_labels; i++)
+        if (parent[i] == -1)
+            number_of_components++;
+
+    return number_of_components;
+}
 
 int find(int x, int parent[]) {
     int j = x;
-    while (parent[j] != 0) {
+    while (parent[j] != -1) {
         j = parent[j];
     }
     return j;
@@ -15,19 +37,8 @@ void union_ (int x, int y, int parent[]) {
     int j = find(x, parent);
     int k = find(y, parent);
 
-    if (j != k) {
+    if (j != k)
         parent[k] = j;
-    }
-}
-
-
-void flatten(int x, int parent[]) {
-    int j = x;
-    while (parent[j] != 0) {
-        j = parent[j];
-        std::cout<<"flatten\n";
-    }
-    parent[x] = j;
 }
 
 void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image){
@@ -38,24 +49,21 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     int parent[2000]; 
 
-    int current_label = 1; //current label counter. starts at 1, increments when a new label is needed
+    int current_label = 0; //current label counter. starts at 1, increments when a new label is needed
 
     // 2 passes over the input image pixels
 
     // first pass
-    std::cout<<"AAA"<<std::endl;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c = 0; c < input_binary_image.width(); c++) {
 
             // Grab the value for the current pixel "e"
             int val = (int) input_binary_image(c, r, 0, 0);
-            std::cout<<val<<" ";
             if (val == 255) {
                 continue;
             }
 
-            // val != 0, => check 16 cases
-
+            // val != 255, => check 16 cases
 
             // read the nearby pixels
             //   ------------
@@ -93,18 +101,14 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             } else if (b == 255){
                 if (c_ == 0) {
                     if (a == 0) {
-                        // copy c_, a
-                        union_(pixel_labels[c-1][r-1], pixel_labels[c+1][r-1], parent);
                         // e = c_;
                         e = pixel_labels[c+1][r-1];
-                        //TODO
                     } else if (a == 255) {
                         if (d == 0) {
                             // copy c, d
                             union_(pixel_labels[c+1][r-1], pixel_labels[c-1][r], parent);
-                            //TODO
                             // e = c_;
-                            e = pixel_labels[c-1][r];
+                            e = pixel_labels[c+1][r-1];
                         } else if (d == 255) {
                             // copy c
                             // e = c_;
@@ -124,7 +128,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
                         } else if (d == 255) {
                             // new label
                             e = current_label;
-                            parent[current_label] = 0; //new tree in the forest
+                            parent[current_label] = -1; //new tree in the forest
                             current_label++;
                         }
                     }
@@ -136,60 +140,54 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         }
     }
 
-    // second pass
-    //first flatten the parent tree
-    for (int i=1; i<current_label+1; i++) {
-        if (parent[i] != 0) //don't flatten tree roots
-          flatten(i, parent);
-    }
-    std::cout<<"CCC"<<std::endl;
-
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (pixel_labels[c][r] == 0) {
-                continue; //0 is the default, so this pixel isn't in a component
+            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+                continue; //pixel is in the background
             }
-
-            int tree_root_label = find(pixel_labels[c][r], parent);
-            if (pixel_labels[c][r] != tree_root_label) {
-                // std::cout<<"Changing "<<pixel_labels[c][r]<<" to "<<tree_root_label<<std::endl; 
-                pixel_labels[c][r] = tree_root_label;
-            }
+            pixel_labels[c][r] = find(pixel_labels[c][r], parent);
         }
     }
 
-
+    // The following code is for PAINTING the region colors (the two passes have already been completed)
+    int number_of_components = getNumberOfComponents(parent, current_label);
     // color the image by their components
-    int colors_r[9] = {255,254,253,253,253,241,217,166,127};
-    int colors_g[9] = {245,230,208,174,141,105,72,54,39};
-    int colors_b[9] = {235,206,162,107,60,19,1,3,4};
+
+    //generate random colors for each component
+    // I realize that not all 2000 colors will be used, but this simplifies the following section
+    int colors_r[2000],
+        colors_g[2000],
+        colors_b[2000];
+
+    for (int i=0; i<2000; i++) {
+        colors_r[i] = rand() % 255;
+        colors_g[i] = rand() % 255;
+        colors_b[i] = rand() % 255;
+    }
+
+    // loop through parent array, replace 0's with their index
+    for (int i=0; i<current_label; i++) {
+        if (parent[i] == -1)
+            parent[i] = i;
+    }
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (pixel_labels[c][r] == 0) {
-                continue; //0 is the default, so this pixel isn't in a component
+            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+                continue; //background pixel
             }
 
-            int component_index = pixel_labels[c][r];
-            output_image(c,r,0) = colors_r[component_index];
-            output_image(c,r,1) = colors_g[component_index];;
-            output_image(c,r,2) = colors_b[component_index];;
+            int label = parent[pixel_labels[c][r]];
+            output_image(c, r, 0) = colors_r[label];
+            output_image(c, r, 1) = colors_g[label];
+            output_image(c, r, 2) = colors_b[label];
         }
     }
-    std::cout<<"BBB"<<std::endl;
-    // Print the parent array
-    for (int i=1; i<current_label; i++) {
-        std::cout<<i<<" ";
-    }
-    std::cout<<std::endl;
-    for (int i=1; i<current_label; i++) {
-        std::cout<<parent[i]<<" ";
-    }
-    std::cout<<std::endl;
+
+    std::cout<<"Number of Components = "<<number_of_components<<std::endl;
 }
 
-// Part A
-void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image){
+void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image) {
     grayscale_image.assign(image.width(),image.height(),1,1);
     grayscale_image.fill(0);
     if(image.spectrum()==3 || image.spectrum() == 4){
