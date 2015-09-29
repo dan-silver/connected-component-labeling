@@ -4,6 +4,7 @@
 #include <list>
 #include <set>
 #include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time to seed srand*/ 
 
 // helper class for part B only
 class Component {
@@ -34,7 +35,7 @@ class Component {
         void incrementArea() {
             this->area++;
         }
-} component;
+};
 
 /**
  *  Populate the allocated component[] array with the unique components
@@ -43,27 +44,28 @@ void populateComponentArray(Component components[], int parent[], int current_la
     //get the unique component labels
     std::set<int> unique_labels;
 
-    for (int i=0; i<=current_label; i++) {
+    for (int i=0; i<current_label; i++) {
         unique_labels.insert(parent[i]); //labels that are inserted twice are ignored
     }
 
     // iterate through the set, add components to the array
     int component_counter = 0;
+    Component* component;
     while (!unique_labels.empty()) {
       int label = *(unique_labels.begin());
       unique_labels.erase(label);
-      Component component;
-      component.setLabel(label);
-      components[component_counter] = component;
+      component = &components[component_counter];
+      component->setLabel(label);
       component_counter++;
     }
 }
 
 //maps the old indices to the new component index in components[]
 void createComponentIndexMap(int componentIndexMap[], Component components[], int number_of_components) {
-    for (int i=0;i<number_of_components;i++) {
-        Component c = components[i];
-        componentIndexMap[c.label] = i;
+    Component* c;
+    for (int i=0; i<number_of_components; i++) {
+        c = &components[i];
+        componentIndexMap[c->label] = i;
         // std::cout<<"old="<<c.label<<" new = "<<componentIndexMap[c.label]<<std::endl;
     }
 }
@@ -97,24 +99,27 @@ void union_ (int x, int y, int parent[]) {
         parent[k] = j;
 }
 
-void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image){
-    output_image.assign(input_binary_image.width(), input_binary_image.height(),1,3);
+void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image) {
+    std::cout<<"A1"<<std::endl;
+    srand (time(NULL));
+    output_image.assign(input_binary_image.width(), input_binary_image.height(), 1, 3);
     output_image.fill(255);
 
     int pixel_labels[input_binary_image.width()][input_binary_image.height()] = {0};
 
     int parent[2000]; 
 
-    int current_label = 0; //current label counter. starts at 1, increments when a new label is needed
+    int current_label = 0; //current label counter. increments when a new label is needed
 
-    // 2 passes over the input image pixels
+    // 2 passes over the input image pixels for ccl
 
+    std::cout<<"A2"<<std::endl;
     // first pass
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c = 0; c < input_binary_image.width(); c++) {
 
             // Grab the value for the current pixel "e"
-            int val = (int) input_binary_image(c, r, 0, 0);
+            int val = input_binary_image(c, r, 0, 0);
             if (val == 255) {
                 continue;
             }
@@ -130,22 +135,22 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
             int a, b, c_, d, e; //c_ because c already used in loop
             if (c > 0 && r > 0)
-                a = (int) input_binary_image(c - 1,r - 1, 0, 0);
+                a = input_binary_image(c - 1,r - 1, 0, 0);
             else
                 a = 255;
             
             if (r > 0)
-                b = (int) input_binary_image(c,r - 1, 0, 0);
+                b = input_binary_image(c,r - 1, 0, 0);
             else
                 b = 255;
             
             if (r > 0 && c + 1 < input_binary_image.width())
-                c_ = (int) input_binary_image(c + 1,r - 1, 0, 0);
+                c_ = input_binary_image(c + 1,r - 1, 0, 0);
             else
                 c_ = 255;
             
             if (c > 0)
-                d = (int) input_binary_image(c - 1,r, 0, 0);
+                d = input_binary_image(c - 1,r, 0, 0);
             else
                 d = 255;
 
@@ -195,10 +200,11 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
         }
     }
+    std::cout<<"A3"<<std::endl;
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255) {
                 continue; //pixel is in the background
             }
             pixel_labels[c][r] = find(pixel_labels[c][r], parent);
@@ -229,11 +235,11 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255) {
                 continue; //background pixel
             }
 
-            int label = parent[pixel_labels[c][r]];
+            int label = pixel_labels[c][r];
             output_image(c, r, 0) = colors_r[label];
             output_image(c, r, 1) = colors_g[label];
             output_image(c, r, 2) = colors_b[label];
@@ -254,7 +260,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     Component *component;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255) {
                 continue; //background pixel
             }
             // find the component (very fast) and increment the area
@@ -269,7 +275,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     // 1st moment
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255) {
                 continue; //background pixel
             }
             // find the component (very fast) and add to the 
@@ -292,7 +298,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if (((int) input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255) {
                 continue; //background pixel
             }
             // find the component (very fast) and add to the 
@@ -321,13 +327,13 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
 }
 
-void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image) {
+void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image){
     grayscale_image.assign(image.width(),image.height(),1,1);
     grayscale_image.fill(0);
-    if(image.spectrum()==3 || image.spectrum() == 4){
+    if(image.spectrum()==3 || image.spectrum() == 4) {
         int R,G,B;
-        for (int r = 0 ; r< image.height(); r++){
-            for (int c= 0 ; c < image.width(); c++){
+        for (int r = 0 ; r< image.height(); r++) {
+            for (int c= 0 ; c < image.width(); c++) {
                 R = (int)image(c,r,0,0);
                 G = (int)image(c,r,0,1);
                 B = (int)image(c,r,0,2);
@@ -349,5 +355,29 @@ void binarize_image (cimg_library::CImg<> &image, int threshold) {
     }
 }
 
+
+void invertImage (cimg_library::CImg<> &image) {
+    for (int y = 0 ; y < image.height(); y++){
+        for (int x= 0 ; x < image.width(); x++){
+            int pixelValue = (int)image(x, y, 0);
+            image(x, y, 0) = 255 - pixelValue;
+        }
+    }
+}
+
+bool imageIsBinary(cimg_library::CImg<> &image) {
+    bool isBinary = true;
+    for (int r = 0; r < image.height(); r++) {
+        for (int c = 0; c < image.width(); c++) {
+            int val = image(c,r,0,0);
+            if (val != 0 && val != 255) {
+                isBinary = false;
+                break;
+            }
+        }
+        if (!isBinary) break; //escape outer loop
+    }
+    return isBinary;
+}
 
 #endif
