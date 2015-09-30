@@ -6,8 +6,10 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time to seed srand*/ 
 #include <map>
+#include <queue>
+#include <functional>
 
-// helper class for part B only
+
 class Component {
     public:
         Component(int label) {
@@ -23,10 +25,8 @@ class Component {
             variance_x,
             color[3];
 
-        // void printInfo(int newIndex) {
         void printInfo() {
             std::cout<<"Region "<<this->label<<std::endl;
-            // std::cout<<"Region "<<newIndex+1<<":"<<std::endl;
             std::cout<<"\t Area: "<<this->area<<std::endl;
             std::cout<<"\t Centroid: ("<<centroid_x<<", "<<centroid_y<<")"<<std::endl;
             std::cout<<"\t variance x: "<<variance_x<<std::endl;
@@ -38,15 +38,24 @@ class Component {
         }
 
         void incrementArea() {
-            area++;
+            this->area++;
         }
 
         void setRandomColor() {
-            color[0] = rand() % 255;
-            color[1] = rand() % 255;
-            color[2] = rand() % 255;
+            this->color[0] = rand() % 255;
+            this->color[1] = rand() % 255;
+            this->color[2] = rand() % 255;
         }
+
 };
+
+// Given two Components, find the larger one
+struct DereferenceCompareNode : public std::binary_function<Component*, Component*, bool> {
+    bool operator()(const Component* lhs, const Component* rhs) const {
+        return lhs->area < rhs->area;
+    }
+};
+
 
 int getNumberOfComponents(int parent[], int number_of_labels) {
     // simply count the number of -1s
@@ -60,17 +69,20 @@ int getNumberOfComponents(int parent[], int number_of_labels) {
     return number_of_components;
 }
 
+
+// Creates a key-value map that relates component label to a component object
+// Enables fast lookup of components
 void createComponentMap(int current_label, int parent[], std::map<int,Component> &components) {
     for (int i=0; i<current_label; i++) {
         int label = parent[i];
         std::map<int,Component>::iterator it = components.find(label);
-        if(it != components.end()) continue;
-           //element found;
+        if(it != components.end()) continue; //element found;
 
         components.insert( std::pair<int,Component>(label, Component(label)));
     }
 }
 
+// loop up a tree to find the tree root for a given element in the parent array
 int find(int x, int parent[]) {
     int j = x;
     while (parent[j] != -1) {
@@ -78,19 +90,6 @@ int find(int x, int parent[]) {
     }
     return j;
 }
-
-// // For debugging
-// void printParentArray(int parent[], int number_of_labels) {
-//     std::cout<<"parent array"<<std::endl;
-
-//     for (int i=0;i<number_of_labels;i++)
-//         std::cout<<i<<" ";
-//     std::cout<<std::endl;
-
-//     for (int i=0;i<number_of_labels;i++)
-//         std::cout<<parent[i]<<" ";
-//     std::cout<<std::endl;
-// }
 
 // union_ because union is a reserved word
 void union_ (int x, int y, int parent[]) {
@@ -107,7 +106,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     int pixel_labels[input_binary_image.width()][input_binary_image.height()] = {0};
 
-    int parent[2000]; 
+    int parent[2000];
 
     int current_label = 0; //current label counter. increments when a new label is needed
 
@@ -203,8 +202,6 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     }
 
     // second pass to update the labels
-
-
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255)
@@ -228,9 +225,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     //generate random colors for each component
     typedef std::map<int, Component>::iterator it_type;
-    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
+    for (it_type iterator = components.begin(); iterator != components.end(); iterator++)
         iterator->second.setRandomColor();
-    }
 
     // color the image by their components
     for (int r = 0; r < input_binary_image.height(); r++) {
@@ -244,8 +240,6 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             if(it != components.end()) {
                 component = &it->second;
 
-
-
                 output_image(c, r, 0) = component->color[0];
                 output_image(c, r, 1) = component->color[1];
                 output_image(c, r, 2) = component->color[2];
@@ -256,7 +250,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     // 0th moment
     // loop over pixels and add them to the area of the components
-
+    std::map<int,Component>::iterator it;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255) {
@@ -265,7 +259,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             // find the component (very fast) and increment the area
             int label = pixel_labels[c][r];
 
-            std::map<int,Component>::iterator it = components.find(label);
+            it = components.find(label);
             if(it != components.end()) {
                 component = &it->second;
                 component->incrementArea();
@@ -273,7 +267,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         }
     }
 
-    // 1st moment
+    // 1st moment calculations
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255) {
@@ -281,7 +275,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            std::map<int,Component>::iterator it = components.find(label);
+            it = components.find(label);
             if(it != components.end()) {
                 component = &it->second;
                 component->centroid_x += c;
@@ -298,8 +292,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         component->centroid_y /= component->area;
     }
 
-    // 2nd moment
 
+    // 2nd moment calculation
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255) {
@@ -307,7 +301,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            std::map<int,Component>::iterator it = components.find(label);
+            it = components.find(label);
             if(it != components.end()) {
                 component = &it->second;
                 component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
@@ -316,6 +310,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
         }
     }
+
     // finish the variance equation by dividing by the area
     for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         component = &iterator->second;
@@ -325,14 +320,26 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     }
 
 
+    // Find the 10 largest components by using a priority queue
+    std::priority_queue<Component*, std::vector<Component*>, DereferenceCompareNode> componentsPriorityQueue;
+
+    //add all components to the queue
+    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
+        component = &iterator->second;
+        componentsPriorityQueue.push(component);
+    }
+
     std::cout<<"Number of Components: "<<number_of_components<<std::endl;
     std::cout<<"Maximum number of intermediate labels: "<<current_label<<std::endl;
 
-    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
-        component = &iterator->second;
+
+    //  Print info for the 10 largest components
+    for(int i = 10; i > 0; i--) {
+        if (componentsPriorityQueue.empty()) break; // there are less than 10 components in the image
+        component = componentsPriorityQueue.top();
+        componentsPriorityQueue.pop(); //remove the component from the queue
         component->printInfo();
     }
-
 }
 
 void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image){
