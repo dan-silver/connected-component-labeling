@@ -5,6 +5,7 @@
 #include <set>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time to seed srand*/ 
+#include <map>
 
 // helper class for part B only
 class Component {
@@ -12,15 +13,17 @@ class Component {
         Component() {
             area = centroid_x = centroid_y = variance_x = variance_y = 0;
         }
-        int label;
-        int area; //zeroth moment
-        int centroid_x;
-        int centroid_y;
-        int variance_y;
-        int variance_x;
+
+        int label,
+            area, //zeroth moment
+            centroid_x,
+            centroid_y,
+            variance_y,
+            variance_x,
+            color[3];
 
         void printInfo(int newIndex) {
-            // std::cout<<"Region "<<this->label<<"("<<newIndex<<"):"<<std::endl;
+            // std::cout<<"Region "<<this->label<<std::endl;
             std::cout<<"Region "<<newIndex+1<<":"<<std::endl;
             std::cout<<"\t Area: "<<this->area<<std::endl;
             std::cout<<"\t Centroid: ("<<centroid_x<<", "<<centroid_y<<")"<<std::endl;
@@ -33,7 +36,13 @@ class Component {
         }
 
         void incrementArea() {
-            this->area++;
+            area++;
+        }
+
+        void setRandomColor() {
+            color[0] = rand() % 255;
+            color[1] = rand() % 255;
+            color[2] = rand() % 255;
         }
 };
 
@@ -90,17 +99,28 @@ int find(int x, int parent[]) {
     return j;
 }
 
+// // For debugging
+// void printParentArray(int parent[], int number_of_labels) {
+//     std::cout<<"parent array"<<std::endl;
+
+//     for (int i=0;i<number_of_labels;i++)
+//         std::cout<<i<<" ";
+//     std::cout<<std::endl;
+
+//     for (int i=0;i<number_of_labels;i++)
+//         std::cout<<parent[i]<<" ";
+//     std::cout<<std::endl;
+// }
+
 // union_ because union is a reserved word
 void union_ (int x, int y, int parent[]) {
     int j = find(x, parent);
     int k = find(y, parent);
-
     if (j != k)
         parent[k] = j;
 }
 
 void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image) {
-    std::cout<<"A1"<<std::endl;
     srand (time(NULL));
     output_image.assign(input_binary_image.width(), input_binary_image.height(), 1, 3);
     output_image.fill(255);
@@ -113,7 +133,6 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     // 2 passes over the input image pixels for ccl
 
-    std::cout<<"A2"<<std::endl;
     // first pass
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c = 0; c < input_binary_image.width(); c++) {
@@ -159,34 +178,36 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
                 // copy b
                 // e = b;
                 e = pixel_labels[c][r-1];
-            } else if (b == 255){
+            } else {
                 if (c_ == 0) {
                     if (a == 0) {
                         // e = c_;
+                        // copy c, a
+                        union_(pixel_labels[c+1][r-1], pixel_labels[c-1][r-1], parent);
                         e = pixel_labels[c+1][r-1];
-                    } else if (a == 255) {
+                    } else {
                         if (d == 0) {
                             // copy c, d
                             union_(pixel_labels[c+1][r-1], pixel_labels[c-1][r], parent);
                             // e = c_;
                             e = pixel_labels[c+1][r-1];
-                        } else if (d == 255) {
+                        } else {
                             // copy c
                             // e = c_;
                             e = pixel_labels[c+1][r-1];
                         }
                     }
-                } else if (c_ == 255) {
+                } else {
                     if (a == 0) {
                         // copy a
                         // e = a;
                         e = pixel_labels[c-1][r-1];
-                    } else if (a == 255) {
+                    } else {
                         if (d == 0) {
                             // copy d
                             // e = d;
                             e = pixel_labels[c-1][r];
-                        } else if (d == 255) {
+                        } else {
                             // new label
                             e = current_label;
                             parent[current_label] = -1; //new tree in the forest
@@ -200,64 +221,67 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
         }
     }
-    std::cout<<"A3"<<std::endl;
+
+    // second pass to update the labels
+
 
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if ((input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255)
                 continue; //pixel is in the background
-            }
+
             pixel_labels[c][r] = find(pixel_labels[c][r], parent);
         }
     }
 
     // The following code is for PAINTING the region colors (the two passes have already been completed)
     int number_of_components = getNumberOfComponents(parent, current_label);
-    // color the image by their components
-
-    //generate random colors for each component
-    // I realize that not all 2000 colors will be used, but this simplifies the following section
-    int colors_r[2000],
-        colors_g[2000],
-        colors_b[2000];
-
-    for (int i=0; i<2000; i++) {
-        colors_r[i] = rand() % 255;
-        colors_g[i] = rand() % 255;
-        colors_b[i] = rand() % 255;
-    }
-
     // loop through parent array, replace -1's with their index
     for (int i=0; i<current_label; i++) {
         if (parent[i] == -1)
             parent[i] = i;
     }
 
+    Component components[number_of_components];
+    std::map <int, Component> component_map; //{original label, Component}
+    int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
+
+
+    populateComponentArray(components, parent, current_label);
+    createComponentIndexMap(componentIndexMap, components, number_of_components);
+
+    //generate random colors for each component
+    for (int i=0; i<number_of_components; i++) {
+        components[i].setRandomColor();
+    }
+
+    // color the image by their components
+    Component *component;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
-            if ((input_binary_image(c, r, 0, 0)) == 255) {
+            if ((input_binary_image(c, r, 0, 0)) == 255)
                 continue; //background pixel
-            }
 
             int label = pixel_labels[c][r];
-            output_image(c, r, 0) = colors_r[label];
-            output_image(c, r, 1) = colors_g[label];
-            output_image(c, r, 2) = colors_b[label];
+
+            component = &components[componentIndexMap[label]];
+
+            output_image(c, r, 0) = component->color[0];
+            output_image(c, r, 1) = component->color[1];
+            output_image(c, r, 2) = component->color[2];
         }
     }
 
 
 
-    Component components[number_of_components];
-    int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
+    // Component components[number_of_components];
 
-    populateComponentArray(components, parent, current_label);
-    createComponentIndexMap(componentIndexMap, components, number_of_components);
+    // int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
+
 
     // 0th moment
     // loop over pixels and add them to the area of the components
 
-    Component *component;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255) {
