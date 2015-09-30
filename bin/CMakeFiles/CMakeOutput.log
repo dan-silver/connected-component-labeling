@@ -23316,3 +23316,35 @@ Linking C executable cmTryCompileExec1846850513
 make[1]: Leaving directory '/home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp'
 
 
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_CXX11 succeded with the following output:
+Change Dir: /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2807519545/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2807519545.dir/build.make CMakeFiles/cmTryCompileExec2807519545.dir/build
+make[1]: Entering directory '/home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec2807519545.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX11   -std=c++11 -o CMakeFiles/cmTryCompileExec2807519545.dir/src.cxx.o -c /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTryCompileExec2807519545
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2807519545.dir/link.txt --verbose=1
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX11    CMakeFiles/cmTryCompileExec2807519545.dir/src.cxx.o  -o cmTryCompileExec2807519545 -rdynamic 
+make[1]: Leaving directory '/home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp'
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_CXX0X succeded with the following output:
+Change Dir: /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3214878637/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3214878637.dir/build.make CMakeFiles/cmTryCompileExec3214878637.dir/build
+make[1]: Entering directory '/home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec3214878637.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX0X   -std=c++0x -o CMakeFiles/cmTryCompileExec3214878637.dir/src.cxx.o -c /home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTryCompileExec3214878637
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3214878637.dir/link.txt --verbose=1
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX0X    CMakeFiles/cmTryCompileExec3214878637.dir/src.cxx.o  -o cmTryCompileExec3214878637 -rdynamic 
+make[1]: Leaving directory '/home/dan/Desktop/4650/CCL/bin/CMakeFiles/CMakeTmp'
+
+Source file was:
+int main() { return 0; }

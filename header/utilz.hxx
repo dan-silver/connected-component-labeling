@@ -60,6 +60,17 @@ int getNumberOfComponents(int parent[], int number_of_labels) {
     return number_of_components;
 }
 
+void createComponentMap(int current_label, int parent[], std::map<int,Component> &components) {
+    for (int i=0; i<current_label; i++) {
+        int label = parent[i];
+        std::map<int,Component>::iterator it = components.find(label);
+        if(it != components.end()) continue;
+           //element found;
+
+        components.insert( std::pair<int,Component>(label, Component(label)));
+    }
+}
+
 int find(int x, int parent[]) {
     int j = x;
     while (parent[j] != -1) {
@@ -211,31 +222,17 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             parent[i] = i;
     }
 
-    std::map <int, Component> component_map; //{original label, Component}
-    int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
-
-
-    for (int i=0; i<current_label; i++) {
-        int label = parent[i];
-        std::map<int,Component>::iterator it = component_map.find(label);
-        if(it != component_map.end()) continue;
-           //element found;
-
-        component_map.insert( std::pair<int,Component>(label, Component(label)));
-    }
-
-
-    // populateComponentArray(components, parent, current_label);
-    // createComponentIndexMap(componentIndexMap, components, number_of_components);
+    std::map <int, Component> components; //{original label, Component}
+    Component *component;
+    createComponentMap(current_label, parent, components);
 
     //generate random colors for each component
     typedef std::map<int, Component>::iterator it_type;
-    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         iterator->second.setRandomColor();
     }
 
     // color the image by their components
-    Component *component;
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255)
@@ -243,8 +240,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
             int label = pixel_labels[c][r];
 
-            std::map<int,Component>::iterator it = component_map.find(label);
-            if(it != component_map.end()) {
+            std::map<int,Component>::iterator it = components.find(label);
+            if(it != components.end()) {
                 component = &it->second;
 
 
@@ -268,8 +265,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             // find the component (very fast) and increment the area
             int label = pixel_labels[c][r];
 
-            std::map<int,Component>::iterator it = component_map.find(label);
-            if(it != component_map.end()) {
+            std::map<int,Component>::iterator it = components.find(label);
+            if(it != components.end()) {
                 component = &it->second;
                 component->incrementArea();
             }
@@ -284,8 +281,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            std::map<int,Component>::iterator it = component_map.find(label);
-            if(it != component_map.end()) {
+            std::map<int,Component>::iterator it = components.find(label);
+            if(it != components.end()) {
                 component = &it->second;
                 component->centroid_x += c;
                 component->centroid_y += r;
@@ -294,7 +291,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     }
 
     // Loop over the components, and divide the sum of the coordinates by the area to finish the first moment calculation
-    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         component = &iterator->second;
         if (component->area == 0) continue;
         component->centroid_x /= component->area;
@@ -310,8 +307,8 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            std::map<int,Component>::iterator it = component_map.find(label);
-            if(it != component_map.end()) {
+            std::map<int,Component>::iterator it = components.find(label);
+            if(it != components.end()) {
                 component = &it->second;
                 component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
                 component->variance_y += (c - component->centroid_y) * (c - component->centroid_y);
@@ -320,7 +317,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
         }
     }
     // finish the variance equation by dividing by the area
-    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         component = &iterator->second;
         if (component->area == 0) continue;
         component->variance_x /= component->area;
@@ -331,7 +328,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     std::cout<<"Number of Components: "<<number_of_components<<std::endl;
     std::cout<<"Maximum number of intermediate labels: "<<current_label<<std::endl;
 
-    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+    for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         component = &iterator->second;
         component->printInfo();
     }
