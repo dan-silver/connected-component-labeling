@@ -10,8 +10,9 @@
 // helper class for part B only
 class Component {
     public:
-        Component() {
+        Component(int label) {
             area = centroid_x = centroid_y = variance_x = variance_y = 0;
+            this->label = label;
         }
 
         int label,
@@ -22,9 +23,10 @@ class Component {
             variance_x,
             color[3];
 
-        void printInfo(int newIndex) {
-            // std::cout<<"Region "<<this->label<<std::endl;
-            std::cout<<"Region "<<newIndex+1<<":"<<std::endl;
+        // void printInfo(int newIndex) {
+        void printInfo() {
+            std::cout<<"Region "<<this->label<<std::endl;
+            // std::cout<<"Region "<<newIndex+1<<":"<<std::endl;
             std::cout<<"\t Area: "<<this->area<<std::endl;
             std::cout<<"\t Centroid: ("<<centroid_x<<", "<<centroid_y<<")"<<std::endl;
             std::cout<<"\t variance x: "<<variance_x<<std::endl;
@@ -45,39 +47,6 @@ class Component {
             color[2] = rand() % 255;
         }
 };
-
-/**
- *  Populate the allocated component[] array with the unique components
- */
-void populateComponentArray(Component components[], int parent[], int current_label) {
-    //get the unique component labels
-    std::set<int> unique_labels;
-
-    for (int i=0; i<current_label; i++) {
-        unique_labels.insert(parent[i]); //labels that are inserted twice are ignored
-    }
-
-    // iterate through the set, add components to the array
-    int component_counter = 0;
-    Component* component;
-    while (!unique_labels.empty()) {
-      int label = *(unique_labels.begin());
-      unique_labels.erase(label);
-      component = &components[component_counter];
-      component->setLabel(label);
-      component_counter++;
-    }
-}
-
-//maps the old indices to the new component index in components[]
-void createComponentIndexMap(int componentIndexMap[], Component components[], int number_of_components) {
-    Component* c;
-    for (int i=0; i<number_of_components; i++) {
-        c = &components[i];
-        componentIndexMap[c->label] = i;
-        // std::cout<<"old="<<c.label<<" new = "<<componentIndexMap[c.label]<<std::endl;
-    }
-}
 
 int getNumberOfComponents(int parent[], int number_of_labels) {
     // simply count the number of -1s
@@ -242,17 +211,27 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             parent[i] = i;
     }
 
-    Component components[number_of_components];
     std::map <int, Component> component_map; //{original label, Component}
     int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
 
 
-    populateComponentArray(components, parent, current_label);
-    createComponentIndexMap(componentIndexMap, components, number_of_components);
+    for (int i=0; i<current_label; i++) {
+        int label = parent[i];
+        std::map<int,Component>::iterator it = component_map.find(label);
+        if(it != component_map.end()) continue;
+           //element found;
+
+        component_map.insert( std::pair<int,Component>(label, Component(label)));
+    }
+
+
+    // populateComponentArray(components, parent, current_label);
+    // createComponentIndexMap(componentIndexMap, components, number_of_components);
 
     //generate random colors for each component
-    for (int i=0; i<number_of_components; i++) {
-        components[i].setRandomColor();
+    typedef std::map<int, Component>::iterator it_type;
+    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+        iterator->second.setRandomColor();
     }
 
     // color the image by their components
@@ -264,20 +243,19 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
             int label = pixel_labels[c][r];
 
-            component = &components[componentIndexMap[label]];
+            std::map<int,Component>::iterator it = component_map.find(label);
+            if(it != component_map.end()) {
+                component = &it->second;
 
-            output_image(c, r, 0) = component->color[0];
-            output_image(c, r, 1) = component->color[1];
-            output_image(c, r, 2) = component->color[2];
+
+
+                output_image(c, r, 0) = component->color[0];
+                output_image(c, r, 1) = component->color[1];
+                output_image(c, r, 2) = component->color[2];
+            }
         }
+
     }
-
-
-
-    // Component components[number_of_components];
-
-    // int componentIndexMap[current_label] = {0}; //maps the old indices to the new component index in components[]
-
 
     // 0th moment
     // loop over pixels and add them to the area of the components
@@ -290,9 +268,11 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             // find the component (very fast) and increment the area
             int label = pixel_labels[c][r];
 
-            component = &components[componentIndexMap[label]];
-            component->incrementArea();
-            // std::cout<<componentIndexMap[label]<<":"<<component->area<<std::endl;
+            std::map<int,Component>::iterator it = component_map.find(label);
+            if(it != component_map.end()) {
+                component = &it->second;
+                component->incrementArea();
+            }
         }
     }
 
@@ -304,18 +284,21 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            component = &components[componentIndexMap[label]];
-
-            component->centroid_x += c;
-            component->centroid_y += r;
+            std::map<int,Component>::iterator it = component_map.find(label);
+            if(it != component_map.end()) {
+                component = &it->second;
+                component->centroid_x += c;
+                component->centroid_y += r;
+            }
         }
     }
 
     // Loop over the components, and divide the sum of the coordinates by the area to finish the first moment calculation
-    for (int i=0; i<number_of_components; i++) {
-        if (components[i].area == 0) continue;
-        components[i].centroid_x /= components[i].area;
-        components[i].centroid_y /= components[i].area;
+    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+        component = &iterator->second;
+        if (component->area == 0) continue;
+        component->centroid_x /= component->area;
+        component->centroid_y /= component->area;
     }
 
     // 2nd moment
@@ -327,26 +310,30 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             }
             // find the component (very fast) and add to the 
             int label = pixel_labels[c][r];
-            component = &components[componentIndexMap[label]];
-
-            component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
-            component->variance_y += (c - component->centroid_y) * (c - component->centroid_y);
+            std::map<int,Component>::iterator it = component_map.find(label);
+            if(it != component_map.end()) {
+                component = &it->second;
+                component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
+                component->variance_y += (c - component->centroid_y) * (c - component->centroid_y);
+            }
 
         }
     }
     // finish the variance equation by dividing by the area
-    for (int i=0; i<number_of_components; i++) {
-        if (components[i].area == 0) continue;
-        components[i].variance_x /= components[i].area;
-        components[i].variance_y /= components[i].area;
+    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+        component = &iterator->second;
+        if (component->area == 0) continue;
+        component->variance_x /= component->area;
+        component->variance_y /= component->area;
     }
 
 
     std::cout<<"Number of Components: "<<number_of_components<<std::endl;
     std::cout<<"Maximum number of intermediate labels: "<<current_label<<std::endl;
 
-    for (int i=0; i<number_of_components; i++) {
-        components[i].printInfo(i);
+    for(it_type iterator = component_map.begin(); iterator != component_map.end(); iterator++) {
+        component = &iterator->second;
+        component->printInfo();
     }
 
 }
