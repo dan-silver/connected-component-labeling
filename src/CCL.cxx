@@ -35,26 +35,20 @@ int main(int argc, char *argv[]) {
     }
 
     //first make sure the image has 1 channel
-    std::cout<<"AAA"<<std::endl;
     convert_to_grayscale(input_image, grayscale_image);
-    std::cout<<"BBB"<<std::endl;
     if (input_image.spectrum()==3 || input_image.spectrum() == 4) {
         input_image = grayscale_image;
     }
 
     //invert if the flag was set
     if (invert) {
-        std::cout<<"CCC"<<std::endl;
         invertImage(input_image);
-        std::cout<<"DDD"<<std::endl;
     }
 
     // check if the image is binary
     // check if any pixel value isn't 0 or 255
-    std::cout<<"EEE"<<std::endl;
     if (!imageIsBinary(input_image))
         binarize_image(input_image, 127);
-    std::cout<<"FFF"<<std::endl;
 
     input_image.display("Input Image");
 

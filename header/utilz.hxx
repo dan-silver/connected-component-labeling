@@ -9,9 +9,9 @@
 #include <queue>
 #include <functional>
 
-
 class Component {
     public:
+        // initialize all member vars to 0, set the label to what is passed in to the constructor
         Component(int label) {
             area = centroid_x = centroid_y = variance_x = variance_y = 0;
             this->label = label;
@@ -19,28 +19,31 @@ class Component {
 
         int label,
             area, //zeroth moment
-            centroid_x,
-            centroid_y,
-            variance_y,
-            variance_x,
             color[3];
 
-        void printInfo() {
-            std::cout<<"Region "<<this->label<<std::endl;
+        float centroid_x,
+              centroid_y,
+              variance_y,
+              variance_x,
+              covariance;
+
+        //called at the end to print the information of the component
+        void printInfo(int human_readable_label) {
+            std::cout<<"Region " << human_readable_label << ":" << std::endl;
             std::cout<<"\t Area: "<<this->area<<std::endl;
             std::cout<<"\t Centroid: ("<<centroid_x<<", "<<centroid_y<<")"<<std::endl;
-            std::cout<<"\t variance x: "<<variance_x<<std::endl;
-            std::cout<<"\t variance y: "<<variance_y<<std::endl;
+            std::cout<<"\t Variance x: "<<variance_x<<std::endl;
+            std::cout<<"\t Variance y: "<<variance_y<<std::endl;
+            std::cout<<"\t Covariance: "<<covariance<<std::endl;
+            std::cout<<std::endl;
         }
 
-        void setLabel(int label) {
-            this->label = label;
-        }
-
+        //called when a pixel is found in this component
         void incrementArea() {
             this->area++;
         }
 
+        // sets the color array to a random color 0 = R, 1 = G, 2 = B
         void setRandomColor() {
             this->color[0] = rand() % 255;
             this->color[1] = rand() % 255;
@@ -99,6 +102,7 @@ void union_ (int x, int y, int parent[]) {
         parent[k] = j;
 }
 
+// main method called from CCL.cxx
 void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &output_image) {
     srand (time(NULL));
     output_image.assign(input_binary_image.width(), input_binary_image.height(), 1, 3);
@@ -106,7 +110,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     int pixel_labels[input_binary_image.width()][input_binary_image.height()] = {0};
 
-    int parent[2000];
+    int parent[2000]; //2000 is given in the assignment directions, max number of parent labels
 
     int current_label = 0; //current label counter. increments when a new label is needed
 
@@ -119,7 +123,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
             // Grab the value for the current pixel "e"
             int val = input_binary_image(c, r, 0, 0);
             if (val == 255) {
-                continue;
+                continue; //background pixel
             }
 
             // val != 255, => check 16 cases
@@ -196,7 +200,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
                 }
             }
 
-            pixel_labels[c][r] = e;
+            pixel_labels[c][r] = e;  //asign the label to the pixel_labels array
 
         }
     }
@@ -293,7 +297,7 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
     }
 
 
-    // 2nd moment calculation
+    // 2nd moment and covariance calculation
     for (int r = 0; r < input_binary_image.height(); r++) {
         for (int c= 0; c < input_binary_image.width(); c++) {
             if ((input_binary_image(c, r, 0, 0)) == 255) {
@@ -306,19 +310,20 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
                 component = &it->second;
                 component->variance_x += (r - component->centroid_x) * (r - component->centroid_x);
                 component->variance_y += (c - component->centroid_y) * (c - component->centroid_y);
+                component->covariance += (r - component->centroid_x) * (c - component->centroid_y);
             }
 
         }
     }
 
-    // finish the variance equation by dividing by the area
+    // finish the variance and covariance calculations by dividing by the area
     for(it_type iterator = components.begin(); iterator != components.end(); iterator++) {
         component = &iterator->second;
-        if (component->area == 0) continue;
+        if (component->area == 0) continue; //avoids a potential divide by zero program crash
         component->variance_x /= component->area;
         component->variance_y /= component->area;
+        component->covariance /= component->area;
     }
-
 
     // Find the 10 largest components by using a priority queue
     std::priority_queue<Component*, std::vector<Component*>, DereferenceCompareNode> componentsPriorityQueue;
@@ -331,17 +336,19 @@ void exec_ccl(cimg_library::CImg<> &input_binary_image, cimg_library::CImg<> &ou
 
     std::cout<<"Number of Components: "<<number_of_components<<std::endl;
     std::cout<<"Maximum number of intermediate labels: "<<current_label<<std::endl;
-
+    std::cout<<"Component information in order of decreasing area: "<<std::endl;
 
     //  Print info for the 10 largest components
-    for(int i = 10; i > 0; i--) {
+    for(int i = 1; i <= 10; i++) {
         if (componentsPriorityQueue.empty()) break; // there are less than 10 components in the image
         component = componentsPriorityQueue.top();
         componentsPriorityQueue.pop(); //remove the component from the queue
-        component->printInfo();
+        component->printInfo(i);
     }
 }
 
+
+// if the image has 1 channel, the image will not be converted
 void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image){
     grayscale_image.assign(image.width(),image.height(),1,1);
     grayscale_image.fill(0);
@@ -355,10 +362,9 @@ void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &gray
                 grayscale_image(c,r,0,0) = (float) (0.2989 * R + 0.5870 * G + 0.1140 * B);
             }
         }
-    } else if(image.spectrum()==1) {
-        grayscale_image=image;
+    } else if (image.spectrum() == 1) {
+        grayscale_image = image;
     }
-
 }
 
 void binarize_image (cimg_library::CImg<> &image, int threshold) {
@@ -370,7 +376,7 @@ void binarize_image (cimg_library::CImg<> &image, int threshold) {
     }
 }
 
-
+// flip pixels (not binary) using 255 - pixelValue
 void invertImage (cimg_library::CImg<> &image) {
     for (int y = 0 ; y < image.height(); y++){
         for (int x= 0 ; x < image.width(); x++){
@@ -380,19 +386,17 @@ void invertImage (cimg_library::CImg<> &image) {
     }
 }
 
+// returns true if the image is binary
 bool imageIsBinary(cimg_library::CImg<> &image) {
-    bool isBinary = true;
     for (int r = 0; r < image.height(); r++) {
         for (int c = 0; c < image.width(); c++) {
             int val = image(c,r,0,0);
             if (val != 0 && val != 255) {
-                isBinary = false;
-                break;
+                return false;
             }
         }
-        if (!isBinary) break; //escape outer loop
     }
-    return isBinary;
+    return true;
 }
 
 #endif
