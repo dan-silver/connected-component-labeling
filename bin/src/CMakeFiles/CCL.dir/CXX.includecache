@@ -107,22 +107,12 @@ stdint.h
 ../header/utilz.hxx
 CImg.h
 ../header/CImg.h
-list
--
-set
--
-stdlib.h
--
-time.h
--
-map
--
 
-/home/dan/Desktop/4650/CCL/src/CCL.cxx
+/home/dan/Desktop/4650/histograms/src/CCL.cxx
 iostream
 -
 utilz.hxx
-/home/dan/Desktop/4650/CCL/src/utilz.hxx
+/home/dan/Desktop/4650/histograms/src/utilz.hxx
 
 /usr/include/opencv/cv.h
 opencv2/core/core_c.h

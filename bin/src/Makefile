@@ -42,10 +42,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dan/Desktop/4650/CCL
+CMAKE_SOURCE_DIR = /home/dan/Desktop/4650/histograms
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dan/Desktop/4650/CCL/bin
+CMAKE_BINARY_DIR = /home/dan/Desktop/4650/histograms/bin
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,14 +72,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/dan/Desktop/4650/CCL/bin && $(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles /home/dan/Desktop/4650/CCL/bin/src/CMakeFiles/progress.marks
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles 0
+	cd /home/dan/Desktop/4650/histograms/bin && $(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/histograms/bin/CMakeFiles /home/dan/Desktop/4650/histograms/bin/src/CMakeFiles/progress.marks
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f CMakeFiles/Makefile2 src/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/histograms/bin/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/clean
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -88,56 +88,56 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/dan/Desktop/4650/CCL/bin && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/dan/Desktop/4650/histograms/bin && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
-src/CMakeFiles/CCL.dir/rule:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/CCL.dir/rule
-.PHONY : src/CMakeFiles/CCL.dir/rule
+src/CMakeFiles/Histogram.dir/rule:
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Histogram.dir/rule
+.PHONY : src/CMakeFiles/Histogram.dir/rule
 
 # Convenience name for target.
-CCL: src/CMakeFiles/CCL.dir/rule
-.PHONY : CCL
+Histogram: src/CMakeFiles/Histogram.dir/rule
+.PHONY : Histogram
 
 # fast build rule for target.
-CCL/fast:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/build
-.PHONY : CCL/fast
+Histogram/fast:
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/build
+.PHONY : Histogram/fast
 
-CCL.o: CCL.cxx.o
-.PHONY : CCL.o
+Histogram.o: Histogram.cxx.o
+.PHONY : Histogram.o
 
 # target to build an object file
-CCL.cxx.o:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.o
-.PHONY : CCL.cxx.o
+Histogram.cxx.o:
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/Histogram.cxx.o
+.PHONY : Histogram.cxx.o
 
-CCL.i: CCL.cxx.i
-.PHONY : CCL.i
+Histogram.i: Histogram.cxx.i
+.PHONY : Histogram.i
 
 # target to preprocess a source file
-CCL.cxx.i:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.i
-.PHONY : CCL.cxx.i
+Histogram.cxx.i:
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/Histogram.cxx.i
+.PHONY : Histogram.cxx.i
 
-CCL.s: CCL.cxx.s
-.PHONY : CCL.s
+Histogram.s: Histogram.cxx.s
+.PHONY : Histogram.s
 
 # target to generate assembly for a file
-CCL.cxx.s:
-	cd /home/dan/Desktop/4650/CCL/bin && $(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/CCL.cxx.s
-.PHONY : CCL.cxx.s
+Histogram.cxx.s:
+	cd /home/dan/Desktop/4650/histograms/bin && $(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/Histogram.cxx.s
+.PHONY : Histogram.cxx.s
 
 # Help Target
 help:
@@ -145,12 +145,12 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... Histogram"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... CCL"
-	@echo "... CCL.o"
-	@echo "... CCL.i"
-	@echo "... CCL.s"
+	@echo "... Histogram.o"
+	@echo "... Histogram.i"
+	@echo "... Histogram.s"
 .PHONY : help
 
 
@@ -162,6 +162,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/dan/Desktop/4650/CCL/bin && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/dan/Desktop/4650/histograms/bin && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

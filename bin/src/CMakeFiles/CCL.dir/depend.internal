@@ -4,7 +4,7 @@
 src/CMakeFiles/CCL.dir/CCL.cxx.o
  ../header/CImg.h
  ../header/utilz.hxx
- /home/dan/Desktop/4650/CCL/src/CCL.cxx
+ /home/dan/Desktop/4650/histograms/src/CCL.cxx
  /usr/include/opencv/cv.h
  /usr/include/opencv/highgui.h
  /usr/include/x86_64-linux-gnu/bits/ipc.h

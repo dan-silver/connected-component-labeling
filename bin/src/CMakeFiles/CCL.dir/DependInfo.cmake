@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/dan/Desktop/4650/CCL/src/CCL.cxx" "/home/dan/Desktop/4650/CCL/bin/src/CMakeFiles/CCL.dir/CCL.cxx.o"
+  "/home/dan/Desktop/4650/histograms/src/CCL.cxx" "/home/dan/Desktop/4650/histograms/bin/src/CMakeFiles/CCL.dir/CCL.cxx.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

@@ -1,4 +1,4 @@
-# Install script for directory: /home/dan/Desktop/4650/CCL/src
+# Install script for directory: /home/dan/Desktop/4650/histograms/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

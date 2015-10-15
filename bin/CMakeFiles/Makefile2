@@ -47,20 +47,20 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dan/Desktop/4650/CCL
+CMAKE_SOURCE_DIR = /home/dan/Desktop/4650/histograms
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dan/Desktop/4650/CCL/bin
+CMAKE_BINARY_DIR = /home/dan/Desktop/4650/histograms/bin
 
 #=============================================================================
 # Directory level rules for directory src
 
 # Convenience name for "all" pass in the directory.
-src/all: src/CMakeFiles/CCL.dir/all
+src/all: src/CMakeFiles/Histogram.dir/all
 .PHONY : src/all
 
 # Convenience name for "clean" pass in the directory.
-src/clean: src/CMakeFiles/CCL.dir/clean
+src/clean: src/CMakeFiles/Histogram.dir/clean
 .PHONY : src/clean
 
 # Convenience name for "preinstall" pass in the directory.
@@ -68,38 +68,38 @@ src/preinstall:
 .PHONY : src/preinstall
 
 #=============================================================================
-# Target rules for target src/CMakeFiles/CCL.dir
+# Target rules for target src/CMakeFiles/Histogram.dir
 
 # All Build rule for target.
-src/CMakeFiles/CCL.dir/all:
-	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/depend
-	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/dan/Desktop/4650/CCL/bin/CMakeFiles  1
-	@echo "Built target CCL"
-.PHONY : src/CMakeFiles/CCL.dir/all
+src/CMakeFiles/Histogram.dir/all:
+	$(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/depend
+	$(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/dan/Desktop/4650/histograms/bin/CMakeFiles  1
+	@echo "Built target Histogram"
+.PHONY : src/CMakeFiles/Histogram.dir/all
 
 # Include target in all.
-all: src/CMakeFiles/CCL.dir/all
+all: src/CMakeFiles/Histogram.dir/all
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-src/CMakeFiles/CCL.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles 1
-	$(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/CCL.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/CCL/bin/CMakeFiles 0
-.PHONY : src/CMakeFiles/CCL.dir/rule
+src/CMakeFiles/Histogram.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/histograms/bin/CMakeFiles 1
+	$(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/Histogram.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dan/Desktop/4650/histograms/bin/CMakeFiles 0
+.PHONY : src/CMakeFiles/Histogram.dir/rule
 
 # Convenience name for target.
-CCL: src/CMakeFiles/CCL.dir/rule
-.PHONY : CCL
+Histogram: src/CMakeFiles/Histogram.dir/rule
+.PHONY : Histogram
 
 # clean rule for target.
-src/CMakeFiles/CCL.dir/clean:
-	$(MAKE) -f src/CMakeFiles/CCL.dir/build.make src/CMakeFiles/CCL.dir/clean
-.PHONY : src/CMakeFiles/CCL.dir/clean
+src/CMakeFiles/Histogram.dir/clean:
+	$(MAKE) -f src/CMakeFiles/Histogram.dir/build.make src/CMakeFiles/Histogram.dir/clean
+.PHONY : src/CMakeFiles/Histogram.dir/clean
 
 # clean rule for target.
-clean: src/CMakeFiles/CCL.dir/clean
+clean: src/CMakeFiles/Histogram.dir/clean
 .PHONY : clean
 
 #=============================================================================
