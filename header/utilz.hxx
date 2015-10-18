@@ -12,32 +12,39 @@ using namespace std;
 class Histogram {
     public:
         cimg_library::CImg<> image;
+        float* pixel_count_array;
+        int number_of_bins,
+            channel;
 
-        Histogram(cimg_library::CImg<> &image) {
+
+        Histogram(cimg_library::CImg<> &image, int number_of_bins, int channel) {
             this->image = image;
+            this->number_of_bins = number_of_bins;
+            this->channel = channel;
+            placePixelValuesIntoBins();
         }
 
-        int* placePixelValuesIntoBins(int channel, int number_of_bins) {
-            int* countArray = new int[number_of_bins];
-            for (int i=0; i<number_of_bins; i++) {
-                countArray[i] = 0;
+        Histogram* placePixelValuesIntoBins() {
+            this->pixel_count_array = new float[this->number_of_bins];
+            for (int i=0; i<this->number_of_bins; i++) {
+                pixel_count_array[i] = 0;
             }
             
             int value;
             for (int r = 0 ; r < this->image.height(); r++) {
                 for (int c= 0 ; c < this->image.width(); c++) {
-                    value = (int)image(c, r, 0, channel);
+                    value = (int)image(c, r, 0, this->channel);
 
                     //calculate which bin to increment
-                    int bin = floor((float)value/255 * (number_of_bins-1));
+                    int bin = floor((float)value/255 * (this->number_of_bins-1));
 
-                    countArray[bin]++;
+                    pixel_count_array[bin]++;
                 }
             }
-            return countArray;
+            return this;
         }
 
-        void saveHistogramToFile(string chartTitle, int* counts, int number_of_bins) {
+        Histogram* saveHistogramToFile(string chartTitle) {
             std::ofstream out(("../public/charts/" + chartTitle + ".html").c_str());
             out << "<link href='../c3.min.css' rel='stylesheet' type='text/css'><script src='../d3.min.js'></script><script src='../c3.min.js'></script>";
             out << "<h3>" << chartTitle << "</h3><div id='chart'></div>";
@@ -49,48 +56,48 @@ class Histogram {
             out << "        ['Number of Pixels With Value', ";
             
             // print the data into the HTML string
-            for (int i=0; i<number_of_bins; i++) {
-                out << counts[i] << ",";
+            for (int i=0; i<this->number_of_bins; i++) {
+                out << this->pixel_count_array[i] << ",";
             }
 
             out << "]], types: {";
             out << "'Number of Pixels With Value': 'area'";
             out << "}}});</script>";
             out.close();
+            return this;
+        }
+
+        Histogram* normalize() {
+            //get the maximum count in any bin
+            int max_count = -1;
+            for (int i=0; i<this->number_of_bins ;i++) {
+                if (this->pixel_count_array[i] > max_count)
+                    max_count = this->pixel_count_array[i];
+            }
+
+            //go through the bins and divide by the maximum
+            for (int i=0; i<this->number_of_bins ;i++) {
+                this->pixel_count_array[i] /= max_count;
+            }
+
+            return this;
         }
 
 };
 
 void plot_histogram(cimg_library::CImg<> &image, int number_of_bins) {
-    Histogram hist = Histogram(image);
-    for (int i=0; i<2; i++) {
-	    for (int i=0; i<image.spectrum(); i++) {
-		    ostringstream os;
-	        os << "Input Image Channel " << (i+1) << " of " << image.spectrum() << " with " << number_of_bins << " bins";
-	        string title = os.str();
-	        int* theArray = hist.placePixelValuesIntoBins(i, number_of_bins);
-	        hist.saveHistogramToFile(title, theArray, number_of_bins);
-	    }
-	}
-}
+    for (int channel=0; channel<image.spectrum(); channel++) {
+	    ostringstream os;
+        os << "Input Image Channel " << (channel+1) << " of " << image.spectrum() << " with " << number_of_bins << " bins";
+        string title = os.str();
+        os << " (normalized)";
+        string normaled_title = os.str();
 
-// // if the image has 1 channel, the image will not be converted
-// void convert_to_grayscale(cimg_library::CImg<> &image,cimg_library::CImg<> &grayscale_image){
-//     grayscale_image.assign(image.width(),image.height(),1,1);
-//     grayscale_image.fill(0);
-//     if(image.spectrum()==3 || image.spectrum() == 4) {
-//         int R,G,B;
-//         for (int r = 0 ; r< image.height(); r++) {
-//             for (int c= 0 ; c < image.width(); c++) {
-//                 R = (int)image(c,r,0,0);
-//                 G = (int)image(c,r,0,1);
-//                 B = (int)image(c,r,0,2);
-//                 grayscale_image(c,r,0,0) = (float) (0.2989 * R + 0.5870 * G + 0.1140 * B);
-//             }
-//         }
-//     } else if (image.spectrum() == 1) {
-//         grayscale_image = image;
-//     }
-// }
+        Histogram(image, number_of_bins, channel)
+            .saveHistogramToFile(title) //save charts before normalizing
+            ->normalize()
+            ->saveHistogramToFile(normaled_title); //save normalized charts
+    }
+}
 
 #endif
