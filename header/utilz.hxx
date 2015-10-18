@@ -28,18 +28,21 @@ class Histogram {
                 for (int c= 0 ; c < this->image.width(); c++) {
                     value = (int)image(c, r, 0, channel);
 
-                    countArray[value]++;
+                    //calculate which bin to increment
+                    int bin = floor((float)value/255 * (number_of_bins-1));
+
+                    countArray[bin]++;
                 }
             }
             return countArray;
         }
 
         void saveHistogramToFile(string chartTitle, int* counts, int number_of_bins) {
-            std::ofstream out(("../public/" + chartTitle + ".html").c_str());
-            out << "<link href='c3.min.css' rel='stylesheet' type='text/css'><script src='d3.min.js' charset='utf-8'></script><script src='c3.min.js'></script>";
+            std::ofstream out(("../public/charts/" + chartTitle + ".html").c_str());
+            out << "<link href='../c3.min.css' rel='stylesheet' type='text/css'><script src='../d3.min.js'></script><script src='../c3.min.js'></script>";
             out << "<h3>" << chartTitle << "</h3><div id='chart'></div>";
             out << "<script type='text/javascript'>";
-            out << "  var chart = c3.generate({";
+            out << "  c3.generate({";
             out << "    bindto: '#chart',";
             out << "    data: {";
             out << "      columns: [";
@@ -58,15 +61,17 @@ class Histogram {
 
 };
 
-void plot_histogram(cimg_library::CImg<> &image) {
+void plot_histogram(cimg_library::CImg<> &image, int number_of_bins) {
     Histogram hist = Histogram(image);
-    for (int i=0; i<image.spectrum(); i++) {
-    	ostringstream os;
-        os << "Input Image Channel " << (i+1) << " of " << image.spectrum();
-        string title = os.str();
-        int* theArray = hist.placePixelValuesIntoBins(i, 255);
-        hist.saveHistogramToFile(title, theArray, 255);
-    }
+    for (int i=0; i<2; i++) {
+	    for (int i=0; i<image.spectrum(); i++) {
+		    ostringstream os;
+	        os << "Input Image Channel " << (i+1) << " of " << image.spectrum() << " with " << number_of_bins << " bins";
+	        string title = os.str();
+	        int* theArray = hist.placePixelValuesIntoBins(i, number_of_bins);
+	        hist.saveHistogramToFile(title, theArray, number_of_bins);
+	    }
+	}
 }
 
 // // if the image has 1 channel, the image will not be converted
