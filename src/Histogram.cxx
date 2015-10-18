@@ -24,8 +24,14 @@ int main(int argc, char *argv[]) {
     // plot_histogram_with_number_of_bins(input_image, 8);
 
     input_image.display("Input Image");
+
+    // part a
     plot_histogram(input_image, 256); //image, bins
-    plot_histogram(input_image, 50);  //image, bins
+    // plot_histogram(input_image, 50);  //image, bins
+
+
+    // part b
+    // run_histogram_equalization(input_image).display("Image after histogram equalization");
 
     //all programs must be written the Unix way
     //ANSI C++ standards will be applied to all assignments
